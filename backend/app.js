@@ -3,10 +3,9 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 
 const app = express();
-const PORT = 3000;
 
 // Middleware
-app.use(cors()); // Allow requests from the frontend
+app.use(cors()); // Allow cross-origin requests
 app.use(bodyParser.json()); // Parse JSON request bodies
 
 // Routes
@@ -23,7 +22,13 @@ app.post("/buy", (req, res) => {
   res.json({ id, owner, sellingPrice });
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+// Export the app (for serverless deployment on platforms like Vercel)
+module.exports = app;
+
+// Start the server only if not in a serverless environment
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000; // Use environment variable PORT or default to 3000
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
