@@ -9,9 +9,9 @@ app.use(cors()); // Allow cross-origin requests
 app.use(bodyParser.json()); // Parse JSON request bodies
 
 
-// Routes
-app.post("/", (req, res) => {
-  res.json({ "Hello Render" });
+// Root Route - Return "Hello, World!"
+app.get("/", (req, res) => {
+  res.send("Hello, World!");
 });
 
 // Routes
