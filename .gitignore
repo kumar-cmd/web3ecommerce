@@ -2,3 +2,4 @@
 setup_project.sh
 .vercel
 node_modules/
+node_modules_/
