@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cycle Shop</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/vue@3"></script>
+  <style>
+    .cycle-image {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="container py-4">
+    <h1 class="text-center mb-4">Cycle Shop</h1>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      <div class="col" v-for="cycle in cycles" :key="cycle.id">
+        <div class="card h-100">
+          <img :src="cycle.image" :alt="cycle.brand" class="cycle-image card-img-top">
+          <div class="card-body">
+            <h5 class="card-title">{{ cycle.brand }}</h5>
+            <p class="card-text">
+              <strong>ID:</strong> {{ cycle.id }}<br>
+              <strong>Owner:</strong> {{ cycle.owner }}<br>
+              <strong>Buying Price:</strong> ₹{{ cycle.buyingPrice }}<br>
+              <strong>Selling Price:</strong> ₹{{ cycle.sellingPrice }}<br>
+              <strong>Age:</strong> {{ cycle.age }} years
+            </p>
+          </div>
+          <div class="card-footer text-center">
+            <button class="btn btn-success" @click="buyCycle(cycle)">Buy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    const { createApp } = Vue;
+
+    createApp({
+      data() {
+        return {
+          cycles: [
+            {
+              id: 1,
+              brand: "Hero",
+              owner: "John",
+              buyingPrice: 5000,
+              sellingPrice: 5500,
+              age: 2,
+              image: "https://via.placeholder.com/150?text=Hercules+Cycle",
+            },
+            {
+              id: 2,
+              brand: "Atlas",
+              owner: "Doe",
+              buyingPrice: 4500,
+              sellingPrice: 4800,
+              age: 3,
+              image: "https://via.placeholder.com/150?text=Hercules+Cycle",
+            },
+            {
+              id: 3,
+              brand: "Hercules",
+              owner: "Smith",
+              buyingPrice: 6000,
+              sellingPrice: 6200,
+              age: 1,
+              image: "https://via.placeholder.com/150?text=Hercules+Cycle",
+            },
+          ],
+        };
+      },
+      methods: {
+        buyCycle(cycle) {
+          alert(`You have bought the ${cycle.brand} cycle for ₹${cycle.sellingPrice}!`);
+        },
+      },
+    }).mount('#app');
+  </script>
+</body>
+</html>
