@@ -39,6 +39,9 @@
         </div>
       </div>
     </div>
+    <div v-if="responseMessage" class="alert alert-success mt-4" role="alert">
+      {{ responseMessage }}
+    </div>
   </div>
 
   <!-- Bootstrap JS -->
@@ -58,7 +61,7 @@
               buyingPrice: 5000,
               sellingPrice: 5500,
               age: 2,
-              image: "https://via.placeholder.com/150?text=Hercules+Cycle",
+              image: "https://via.placeholder.com/150?text=Hero+Cycle",
             },
             {
               id: 2,
@@ -67,7 +70,7 @@
               buyingPrice: 4500,
               sellingPrice: 4800,
               age: 3,
-              image: "https://via.placeholder.com/150?text=Hercules+Cycle",
+              image: "https://via.placeholder.com/150?text=Atlas+Cycle",
             },
             {
               id: 3,
@@ -79,14 +82,31 @@
               image: "https://via.placeholder.com/150?text=Hercules+Cycle",
             },
           ],
+          responseMessage: "",
         };
       },
       methods: {
-        buyCycle(cycle) {
-          alert(`You have bought the ${cycle.brand} cycle for ₹${cycle.sellingPrice}!`);
+        async buyCycle(cycle) {
+          try {
+            const response = await fetch("http://localhost:3000/buy", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                id: cycle.id,
+                owner: cycle.owner,
+                sellingPrice: cycle.sellingPrice,
+              }),
+            });
+
+            const result = await response.json();
+            this.responseMessage = `Server Response: Cycle ID: ${result.id}, Owner: ${result.owner}, Selling Price: ₹${result.sellingPrice}`;
+          } catch (error) {
+            console.error("Error:", error);
+            alert("An error occurred while processing your request.");
+          }
         },
       },
-    }).mount('#app');
+    }).mount("#app");
   </script>
 </body>
 </html>

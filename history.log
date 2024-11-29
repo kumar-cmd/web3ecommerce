@@ -1,0 +1,30 @@
+    1  ls
+    2  touch setup_project.sh
+    3  chmod +x setup_project.sh
+    4  ./setup_project.sh
+    5  git status
+    6  git add .
+    7  git status
+    8  ls
+    9  git status
+   10  git add .
+   11  git commit -m "created complete folder structure first time"
+   12  git push -u origin main
+   13  git status
+   14  git add .
+   15  git status
+   16  git commit -m "index.html modified"
+   17  ls
+   18  git status
+   19  git push -u origin main
+   20  ls
+   21  npm install -g vercel
+   22  ls
+   23  cd frontend
+   24  ls
+   25  vercel
+   26  cd ..
+   27  ls
+   28  vercel
+   29  history -> history.log
+   30  history >> history.log
