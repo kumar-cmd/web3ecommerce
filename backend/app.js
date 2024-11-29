@@ -18,17 +18,15 @@ app.post("/buy", (req, res) => {
 
   console.log(`Cycle bought: ID=${id}, Owner=${owner}, Selling Price=₹${sellingPrice}`);
 
-  // Simulating a response
+  // Respond with the data
   res.json({ id, owner, sellingPrice });
 });
 
-// Export the app (for serverless deployment on platforms like Vercel)
-module.exports = app;
+// Use dynamic port for Render deployment
+const PORT = process.env.PORT || 3000;
+const HOST = "0.0.0.0"; // Listen on all network interfaces
 
-// Start the server only if not in a serverless environment
-if (require.main === module) {
-  const PORT = process.env.PORT || 3000; // Use environment variable PORT or default to 3000
-  app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-  });
-}
+// Start the server
+app.listen(PORT, HOST, () => {
+  console.log(`Server is running on http://${HOST}:${PORT}`);
+});
