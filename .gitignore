@@ -3,3 +3,4 @@ setup_project.sh
 .vercel
 node_modules/
 node_modules_/
+test.js
