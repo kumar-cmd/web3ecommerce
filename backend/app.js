@@ -16,7 +16,8 @@ const client = Client.forTestnet();
 client.setOperator(myAccountId, myPrivateKey);
 
 // Define contract details
-const contractId = ContractId.fromString("0.0.5190702");
+// const contractId = ContractId.fromString("0.0.5190702"); 
+const contractId = ContractId.fromString("0.0.5191407");
 const abi = [
     "function getAllBicycles() public view returns (tuple(uint id, address currentOwner, address previousOwner, uint previousPrice, uint sellingPrice, bool forSale, uint creationTimestamp)[])"
 ];
