@@ -116,7 +116,7 @@
       methods: {
         async buyCycle(cycle) {
           try {
-            const response = await fetch("https://web3ecommerce.onrender.com/buy", {
+            const response = await fetch("https://web3ecommerce.onrender.com", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
