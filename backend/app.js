@@ -8,6 +8,12 @@ const app = express();
 app.use(cors()); // Allow cross-origin requests
 app.use(bodyParser.json()); // Parse JSON request bodies
 
+
+// Routes
+app.post("/", (req, res) => {
+  res.json({ "Hello Render" });
+});
+
 // Routes
 app.post("/buy", (req, res) => {
   const { id, owner, sellingPrice } = req.body;
