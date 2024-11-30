@@ -29,10 +29,12 @@ async function getAllBicycles() {
     try {
         const query = new ContractCallQuery()
             .setContractId(contractId)
-            .setGas(100000)
+            .setGas(500000) // Temporarily set a high gas limit
             .setFunction("getAllBicycles");
 
         const response = await query.execute(client);
+
+        console.log("Gas used:", response.gasUsed); // Log the gas used for debugging
 
         // Decode the response using ethers.js
         const decodedData = iface.decodeFunctionResult("getAllBicycles", response.bytes);
@@ -45,7 +47,7 @@ async function getAllBicycles() {
             previousPrice: Number(bicycle.previousPrice),
             sellingPrice: Number(bicycle.sellingPrice),
             forSale: bicycle.forSale,
-            creationTimestamp: new Date(Number(bicycle.creationTimestamp) * 1000)
+            creationTimestamp: new Date(Number(bicycle.creationTimestamp) * 1000),
         }));
     } catch (error) {
         console.error("Error retrieving bicycles:", error);
