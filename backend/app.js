@@ -2,7 +2,14 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
-const { Client, ContractCallQuery, ContractId, PrivateKey } = require("@hashgraph/sdk");
+const {
+    Client,
+    ContractCallQuery,
+    ContractExecuteTransaction,
+    ContractFunctionParameters,
+    ContractId,
+    PrivateKey,
+} = require("@hashgraph/sdk");
 const { Interface } = require("ethers");
 const { configDotenv } = require("dotenv");
 
@@ -12,15 +19,16 @@ const myAccountId = process.env.MY_ACCOUNT_ID;
 const myPrivateKey = PrivateKey.fromStringDer(process.env.MY_PRIVATE_KEY);
 
 // Initialize Hedera Client
-const client = Client.forTestnet();
-client.setOperator(myAccountId, myPrivateKey);
+const client = Client.forTestnet()
+    .setOperator(myAccountId, myPrivateKey)
+    .setMaxAttempts(10) // Retry up to 10 times
+    .setRequestTimeout(120000); // Timeout for each attempt: 120 seconds
 
 // Define contract details
-// const contractId = ContractId.fromString("0.0.5190702"); 
-// const contractId = ContractId.fromString("0.0.5191407"); 
 const contractId = ContractId.fromString("0.0.5191469");
 const abi = [
-    "function getAllBicycles() public view returns (tuple(uint id, address currentOwner, address previousOwner, uint previousPrice, uint sellingPrice, bool forSale, uint creationTimestamp)[])"
+    "function getAllBicycles() public view returns (tuple(uint id, address currentOwner, address previousOwner, uint previousPrice, uint sellingPrice, bool forSale, uint creationTimestamp)[])",
+    "function addBicycle(uint buyingPrice) public",
 ];
 const iface = new Interface(abi);
 
@@ -40,7 +48,7 @@ async function getAllBicycles() {
         const decodedData = iface.decodeFunctionResult("getAllBicycles", response.bytes);
 
         // Transform data for readability
-        return decodedData[0].map(bicycle => ({
+        return decodedData[0].map((bicycle) => ({
             id: Number(bicycle.id),
             currentOwner: bicycle.currentOwner,
             previousOwner: bicycle.previousOwner,
@@ -51,6 +59,32 @@ async function getAllBicycles() {
         }));
     } catch (error) {
         console.error("Error retrieving bicycles:", error);
+        throw error;
+    }
+}
+
+// Hedera function to add a bicycle
+async function addBicycle(buyingPrice) {
+    try {
+        const params = new ContractFunctionParameters().addUint256(buyingPrice);
+
+        const transaction = new ContractExecuteTransaction()
+            .setContractId(contractId)
+            .setGas(300000) // Set sufficient gas
+            .setFunction("addBicycle", params);
+
+        const txResponse = await transaction.execute(client);
+        const receipt = await txResponse.getReceipt(client);
+
+        if (receipt.status.toString() === "SUCCESS") {
+            console.log("Bicycle added successfully:", receipt);
+            return { success: true, receipt };
+        } else {
+            console.error("Failed to add bicycle:", receipt.status.toString());
+            return { success: false, error: receipt.status.toString() };
+        }
+    } catch (error) {
+        console.error("Error adding bicycle:", error);
         throw error;
     }
 }
@@ -75,17 +109,24 @@ app.get("/getcycle", async (req, res) => {
     }
 });
 
-// Endpoint to simulate a purchase
-app.post("/buy", (req, res) => {
-    const { id, owner, sellingPrice } = req.body;
+// Endpoint to add a bicycle
+app.post("/addcycle", async (req, res) => {
+    const { buyingPrice } = req.body;
 
-    if (!id || !owner || !sellingPrice) {
-        return res.status(400).json({ error: "Invalid request. Missing fields." });
+    if (!buyingPrice) {
+        return res.status(400).json({ error: "Invalid request. Missing buying price." });
     }
 
-    console.log(`Cycle bought: ID=${id}, Owner=${owner}, Selling Price=₹${sellingPrice}`);
-
-    res.json({ id, owner, sellingPrice });
+    try {
+        const result = await addBicycle(buyingPrice);
+        if (result.success) {
+            res.json({ message: "Bicycle added successfully!", receipt: result.receipt });
+        } else {
+            res.status(500).json({ error: "Failed to add bicycle", details: result.error });
+        }
+    } catch (error) {
+        res.status(500).json({ error: "An error occurred while adding the bicycle" });
+    }
 });
 
 // Use dynamic port for deployment
