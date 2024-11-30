@@ -2,7 +2,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
-const { Client, ContractExecuteTransaction, ContractId, PrivateKey } = require("@hashgraph/sdk");
+const { Client, ContractCallQuery, ContractId, PrivateKey } = require("@hashgraph/sdk");
+const { Interface } = require("ethers");
 const { configDotenv } = require("dotenv");
 
 // Load environment variables
@@ -15,30 +16,39 @@ const client = Client.forTestnet();
 client.setOperator(myAccountId, myPrivateKey);
 
 // Define contract details
-const contractId = ContractId.fromString("0.0.5191469"); // Update to your contract ID
+// const contractId = ContractId.fromString("0.0.5190702"); 
+// const contractId = ContractId.fromString("0.0.5191407"); 
+const contractId = ContractId.fromString("0.0.5191469");
+const abi = [
+    "function getAllBicycles() public view returns (tuple(uint id, address currentOwner, address previousOwner, uint previousPrice, uint sellingPrice, bool forSale, uint creationTimestamp)[])"
+];
+const iface = new Interface(abi);
 
-// Hedera function to add a bicycle
-async function addBicycle(buyingPrice) {
+// Hedera function to get all bicycles
+async function getAllBicycles() {
     try {
-        const transaction = new ContractExecuteTransaction()
+        const query = new ContractCallQuery()
             .setContractId(contractId)
-            .setGas(100000) // Adjust gas as needed
-            .setFunction("addBicycle", [buyingPrice]);
+            .setGas(100000)
+            .setFunction("getAllBicycles");
 
-        // Sign and execute the transaction
-        const txResponse = await transaction.execute(client);
-        const receipt = await txResponse.getReceipt(client);
+        const response = await query.execute(client);
 
-        // Check the status of the transaction
-        if (receipt.status.toString() === "SUCCESS") {
-            console.log("Bicycle added successfully:", receipt);
-            return { success: true, receipt };
-        } else {
-            console.error("Failed to add bicycle:", receipt.status.toString());
-            return { success: false, error: receipt.status.toString() };
-        }
+        // Decode the response using ethers.js
+        const decodedData = iface.decodeFunctionResult("getAllBicycles", response.bytes);
+
+        // Transform data for readability
+        return decodedData[0].map(bicycle => ({
+            id: Number(bicycle.id),
+            currentOwner: bicycle.currentOwner,
+            previousOwner: bicycle.previousOwner,
+            previousPrice: Number(bicycle.previousPrice),
+            sellingPrice: Number(bicycle.sellingPrice),
+            forSale: bicycle.forSale,
+            creationTimestamp: new Date(Number(bicycle.creationTimestamp) * 1000)
+        }));
     } catch (error) {
-        console.error("Error adding bicycle:", error);
+        console.error("Error retrieving bicycles:", error);
         throw error;
     }
 }
@@ -53,26 +63,6 @@ app.get("/", (req, res) => {
     res.send("Hello, World!");
 });
 
-// Endpoint to add a bicycle
-app.post("/addcycle", async (req, res) => {
-    const { buyingPrice } = req.body;
-
-    if (!buyingPrice) {
-        return res.status(400).json({ error: "Invalid request. Missing buying price." });
-    }
-
-    try {
-        const result = await addBicycle(buyingPrice);
-        if (result.success) {
-            res.json({ message: "Bicycle added successfully!", receipt: result.receipt });
-        } else {
-            res.status(500).json({ error: "Failed to add bicycle", details: result.error });
-        }
-    } catch (error) {
-        res.status(500).json({ error: "An error occurred while adding the bicycle" });
-    }
-});
-
 // Endpoint to get all bicycles
 app.get("/getcycle", async (req, res) => {
     try {
@@ -81,6 +71,19 @@ app.get("/getcycle", async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: "Failed to retrieve bicycles" });
     }
+});
+
+// Endpoint to simulate a purchase
+app.post("/buy", (req, res) => {
+    const { id, owner, sellingPrice } = req.body;
+
+    if (!id || !owner || !sellingPrice) {
+        return res.status(400).json({ error: "Invalid request. Missing fields." });
+    }
+
+    console.log(`Cycle bought: ID=${id}, Owner=${owner}, Selling Price=₹${sellingPrice}`);
+
+    res.json({ id, owner, sellingPrice });
 });
 
 // Use dynamic port for deployment
