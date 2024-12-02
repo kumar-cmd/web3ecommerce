@@ -1,41 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cycle Shop</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="./assets/css/styles.css" rel="stylesheet">
-    <script src="https://unpkg.com/vue@3"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cycle Shop</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/vue@3"></script>
+  <style>
+    .cycle-image {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .navbar {
+      margin-bottom: 20px;
+    }
+    .loading {
+      text-align: center;
+      margin: 20px 0;
+      font-size: 1.5em;
+      color: #555;
+    }
+  </style>
 </head>
 <body>
-    <div id="app"></div>
+  <div id="app">
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Cycle Shop</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item"><a href="#" class="nav-link" @click="currentRoute = 'home'">Home</a></li>
+            <li class="nav-item"><a href="#" class="nav-link" @click="currentRoute = 'web3'">Web3</a></li>
+            <li class="nav-item"><a href="#" class="nav-link" @click="currentRoute = 'addCycle'">Add Cycle</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
 
-    <script type="module">
-        import { createApp } from "vue";
-        import Home from "./assets/js/home.js";
-        import Web3 from "./assets/js/web3.js";
-        import AddCycle from "./assets/js/addCycle.js";
+    <!-- Main Content -->
+    <div class="container mt-4">
+      <component :is="currentComponent"></component>
+    </div>
+  </div>
 
-        const routes = {
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Vue.js Script -->
+  <script type="module">
+    import Home from "./assets/js/home.js";
+    import Web3 from "./assets/js/web3.js";
+    import AddCycle from "./assets/js/addCycle.js";
+
+    const app = Vue.createApp({
+      data() {
+        return {
+          currentRoute: "home", // Default route
+        };
+      },
+      computed: {
+        currentComponent() {
+          const routes = {
             home: Home,
             web3: Web3,
             addCycle: AddCycle,
-        };
+          };
+          return routes[this.currentRoute];
+        },
+      },
+    });
 
-        const app = createApp({
-            data() {
-                return { currentRoute: "home" };
-            },
-            computed: {
-                CurrentPage() {
-                    return routes[this.currentRoute];
-                },
-            },
-            template: `
-                <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-                    <div class="container-fluid">
-                        <a class="navbar-brand" href="#">Cycle Shop</a>
-                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                            <span class="navbar-toggler-icon"></span>
-                        </button>
+    app.mount("#app");
+  </script>
+</body>
+</html>
