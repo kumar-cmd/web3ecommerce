@@ -1,242 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cycle Shop</title>
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://unpkg.com/vue@3"></script>
-  <style>
-    .cycle-image {
-      width: 100%;
-      height: 150px;
-      object-fit: cover;
-      border-radius: 8px;
-    }
-    .navbar {
-      margin-bottom: 20px;
-    }
-    .loading {
-      text-align: center;
-      margin: 20px 0;
-      font-size: 1.5em;
-      color: #555;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cycle Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="./assets/css/styles.css" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3"></script>
 </head>
 <body>
-  <div id="app">
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">Cycle Shop</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <a class="nav-link active" href="#" @click.prevent="showHome">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#" @click.prevent="fetchWeb3Data">Web3</a>
-            </li>
-            <!-- New Menu Item for Adding Cycle -->
-            <li class="nav-item">
-              <a class="nav-link" href="#" @click.prevent="showAddCycleForm">Add Cycle</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+    <div id="app"></div>
 
-    <!-- Main Content -->
-    <div class="container py-4">
-      <h1 v-if="showSection === 'home'" class="text-center mb-4">Welcome to Cycle Shop</h1>
+    <script type="module">
+        import { createApp } from "vue";
+        import Home from "./assets/js/home.js";
+        import Web3 from "./assets/js/web3.js";
+        import AddCycle from "./assets/js/addCycle.js";
 
-      <!-- Home Section -->
-      <div v-if="showSection === 'home'">
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-          <div class="col" v-for="cycle in cycles" :key="cycle.id">
-            <div class="card h-100">
-              <img :src="cycle.image" :alt="cycle.brand" class="cycle-image card-img-top">
-              <div class="card-body">
-                <h5 class="card-title">{{ cycle.brand }}</h5>
-                <p class="card-text">
-                  <strong>ID:</strong> {{ cycle.id }}<br>
-                  <strong>Owner:</strong> {{ cycle.owner }}<br>
-                  <strong>Buying Price:</strong> ₹{{ cycle.buyingPrice }}<br>
-                  <strong>Selling Price:</strong> ₹{{ cycle.sellingPrice }}<br>
-                  <strong>Age:</strong> {{ cycle.age }} years
-                </p>
-              </div>
-              <div class="card-footer text-center">
-                <button class="btn btn-success" @click="buyCycle(cycle)">Buy</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div v-if="responseMessage" class="alert alert-success mt-4" role="alert">
-          {{ responseMessage }}
-        </div>
-      </div>
-
-      <!-- Web3 Section -->
-      <div v-if="showSection === 'web3'">
-        <h1 class="text-center mb-4">Web3 Data</h1>
-        <div v-if="loading" class="loading">Loading data...</div>
-        <div v-else class="row row-cols-1 row-cols-md-2 g-4">
-          <div class="col" v-for="cycle in web3Cycles" :key="cycle.id">
-            <div class="card">
-              <div class="card-body">
-                <h5 class="card-title">Cycle ID: {{ cycle.id }}</h5>
-                <p class="card-text">
-                  <strong>Current Owner:</strong> {{ cycle.currentOwner }}<br>
-                  <strong>Previous Owner:</strong> {{ cycle.previousOwner }}<br>
-                  <strong>Previous Price:</strong> ₹{{ cycle.previousPrice }}<br>
-                  <strong>Selling Price:</strong> ₹{{ cycle.sellingPrice }}<br>
-                  <strong>For Sale:</strong> {{ cycle.forSale ? "Yes" : "No" }}<br>
-                  <strong>Creation Timestamp:</strong> {{ cycle.creationTimestamp }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Add Cycle Section -->
-      <div v-if="showSection === 'addCycle'">
-        <h2 class="text-center mb-4">Add a New Bicycle</h2>
-        <form @submit.prevent="addCycle">
-          <div class="mb-3">
-            <label for="buyingPrice" class="form-label">Buying Price</label>
-            <input
-              type="number"
-              id="buyingPrice"
-              v-model="newCycleBuyingPrice"
-              class="form-control"
-              required
-            />
-          </div>
-          <button type="submit" class="btn btn-primary">Add Bicycle</button>
-        </form>
-        <div v-if="addCycleMessage" class="alert alert-success mt-4" role="alert">
-          {{ addCycleMessage }}
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Vue.js Script -->
-  <script>
-    const { createApp } = Vue;
-
-    createApp({
-      data() {
-        return {
-          showSection: "home", // Tracks the current section (home, web3, or addCycle)
-          cycles: [
-            {
-              id: 1,
-              brand: "Hero",
-              owner: "John",
-              buyingPrice: 7000,
-              sellingPrice: 5500,
-              age: 2,
-              image: "https://via.placeholder.com/150?text=Hero+Cycle",
-            },
-            {
-              id: 2,
-              brand: "Atlas",
-              owner: "Doe",
-              buyingPrice: 4500,
-              sellingPrice: 4800,
-              age: 3,
-              image: "https://via.placeholder.com/150?text=Atlas+Cycle",
-            },
-            {
-              id: 3,
-              brand: "Hercules",
-              owner: "Smith",
-              buyingPrice: 6000,
-              sellingPrice: 6200,
-              age: 1,
-              image: "https://via.placeholder.com/150?text=Hercules+Cycle",
-            },
-          ],
-          responseMessage: "",
-          web3Cycles: [], // Data fetched from the Web3 API
-          loading: false, // Loading state for Web3 data
-          newCycleBuyingPrice: null, // For adding a new bicycle
-          addCycleMessage: "", // Message after successfully adding a bicycle
+        const routes = {
+            home: Home,
+            web3: Web3,
+            addCycle: AddCycle,
         };
-      },
-      methods: {
-        showHome() {
-          this.showSection = "home";
-        },
-        async fetchWeb3Data() {
-          this.showSection = "web3";
-          this.loading = true;
-          try {
-            const response = await fetch("https://web3ecommerce.onrender.com/getcycle");
-            const data = await response.json();
-            this.web3Cycles = data;
-          } catch (error) {
-            console.error("Error fetching Web3 data:", error);
-            alert("Failed to fetch Web3 data");
-          } finally {
-            this.loading = false;
-          }
-        },
-        async buyCycle(cycle) {
-          try {
-            const response = await fetch("https://web3ecommerce.onrender.com/buy", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                id: cycle.id,
-                owner: cycle.owner,
-                sellingPrice: cycle.sellingPrice,
-              }),
-            });
 
-            const result = await response.json();
-            this.responseMessage = `Server Response: Cycle ID: ${result.id}, Owner: ${result.owner}, Selling Price: ₹${result.sellingPrice}`;
-          } catch (error) {
-            console.error("Error:", error);
-            alert("An error occurred while processing your request.");
-          }
-        },
-        showAddCycleForm() {
-          this.showSection = "addCycle";
-        },
-        async addCycle() {
-          try {
-            const response = await fetch("https://web3ecommerce.onrender.com/addcycle", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ buyingPrice: this.newCycleBuyingPrice }),
-            });
-
-            const result = await response.json();
-            if (response.ok) {
-              this.addCycleMessage = result.message;
-              this.newCycleBuyingPrice = null; // Reset the form
-            } else {
-              alert(`Failed to add bicycle: ${result.error}`);
-            }
-          } catch (error) {
-            console.error("Error:", error);
-            alert("An error occurred while adding the bicycle.");
-          }
-        },
-      },
-    }).mount("#app");
-  </script>
-</body>
-</html>
+        const app = createApp({
+            data() {
+                return { currentRoute: "home" };
+            },
+            computed: {
+                CurrentPage() {
+                    return routes[this.currentRoute];
+                },
+            },
+            template: `
+                <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+                    <div class="container-fluid">
+                        <a class="navbar-brand" href="#">Cycle Shop</a>
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
