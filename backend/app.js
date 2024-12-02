@@ -99,6 +99,17 @@ app.get("/", (req, res) => {
     res.send("Hello, World!");
 });
 
+// Routes
+app.post("/buy", (req, res) => {
+    const { id, owner, sellingPrice } = req.body;
+    if (!id || !owner || !sellingPrice) {
+      return res.status(400).json({ error: "Invalid request. Missing fields." });
+    }
+    console.log(`Cycle bought: ID=${id}, Owner=${owner}, Selling Price=₹${sellingPrice}`);
+    // Simulating a response
+    res.json({ id, owner, sellingPrice });
+  });
+
 // Endpoint to get all bicycles
 app.get("/getcycle", async (req, res) => {
     try {
